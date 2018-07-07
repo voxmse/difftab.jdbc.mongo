@@ -19,6 +19,7 @@ public class Driver implements java.sql.Driver {
 
 	public static final int MAJOR_VERSION = 1;
 	public static final int MINOR_VERSION = 0;
+	public static final String URL_PREFIX = "jdbc:mongodb:";
 	  
 	static {
 		try {
@@ -33,7 +34,7 @@ public class Driver implements java.sql.Driver {
 	 */
 	@Override
 	public boolean acceptsURL(String url) throws SQLException {
-		return url.startsWith("jdbc:mongodb:");
+		return url.startsWith(URL_PREFIX);
 	}
 
 	/* (non-Javadoc)
@@ -41,7 +42,15 @@ public class Driver implements java.sql.Driver {
 	 */
 	@Override
 	public Connection connect(String url, Properties info) throws SQLException {
-		return new mse.difftab.jdbc.mongo.Connection(url, info);
+		try {
+			if(acceptsURL(url)) {
+				return new mse.difftab.jdbc.mongo.Connection(url, info);
+			}else{
+				return null;
+			}
+		} catch (Exception e) {
+			throw new SQLException("MongoDB connection error:"+e.getMessage(),e);
+		}			
 	}
 
 	/* (non-Javadoc)
